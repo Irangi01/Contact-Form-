@@ -61,7 +61,7 @@ export default function Home() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Your Name
+                Full Name
               </label>
               <input
                 type="text"
@@ -76,7 +76,7 @@ export default function Home() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Your Email
+                Email Address
               </label>
               <input
                 type="email"
@@ -91,7 +91,7 @@ export default function Home() {
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Your Phone
+                Phone Number
               </label>
               <input
                 type="tel"
@@ -106,7 +106,7 @@ export default function Home() {
 
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                Your Message
+                Message
               </label>
               <textarea
                 id="message"
