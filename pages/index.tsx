@@ -1,17 +1,17 @@
-"use client"
+import { useState } from "react";
+import { db, collection, addDoc } from "../lib/firebase";
+import config from '../tailwind.config';
 
-import { useState } from "react"
-import { db, collection, addDoc } from "../lib/firebase"
-import config from '../tailwind.config'
-
-console.log(config)
+console.log(config);
 
 type FormData = {
-  name: string
-  email: string
-  phone: string
-  message: string
-}
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  date: string;  // Added date field
+  time: string;  // Added time field
+};
 
 export default function Home() {
   const [formData, setFormData] = useState<FormData>({
@@ -19,38 +19,50 @@ export default function Home() {
     email: "",
     phone: "",
     message: "",
-  })
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState("")
+    date: "", // Default empty date
+    time: "", // Will be auto-filled on submission
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numericValue = e.target.value.replace(/\D/g, ""); // Only numbers
+    setFormData({ ...formData, phone: numericValue });
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
+
+    const currentTime = new Date().toLocaleTimeString(); // Capture current time
 
     try {
+      const submissionData = { ...formData, time: currentTime }; // Add time field
+
       // Save to Firebase
-      await addDoc(collection(db, "contacts"), formData)
+      await addDoc(collection(db, "contacts"), submissionData);
 
       // Send Email
       await fetch("/api/sendEmail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      })
+        body: JSON.stringify(submissionData),
+      });
 
-      setSuccess("Form submitted successfully!")
-      setFormData({ name: "", email: "", phone: "", message: "" })
+      setSuccess("Form submitted successfully!");
+      setFormData({ name: "", email: "", phone: "", message: "", date: "", time: "" });
     } catch (error) {
-      console.error("Error:", error)
-      setSuccess("Failed to submit form.")
+      console.error("Error:", error);
+      setSuccess("Failed to submit form.");
     }
 
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -98,6 +110,23 @@ export default function Home() {
                 id="phone"
                 name="phone"
                 value={formData.phone}
+                onChange={handlePhoneInput}
+                pattern="[0-9]*"
+                inputMode="numeric"
+                required
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+                Select Date
+              </label>
+              <input
+                type="date"
+                id="date"
+                name="date"
+                value={formData.date}
                 onChange={handleChange}
                 required
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
@@ -142,5 +171,5 @@ export default function Home() {
         </div>
       </div>
     </div>
-  )
+  );
 }
